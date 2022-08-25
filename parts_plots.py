@@ -12,6 +12,11 @@ import streamlit as st
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
+pd.set_option('display.max_columns', 50)
+# matplotlib figures styling
+plt.rcParams['figure.figsize'] = [10, 5]
+plt.style.use('fivethirtyeight')
+
 df = pd.read_csv('basic_parts_data.csv')
 
 ls_product_cat = ['Type', 'Subtype', 'seller name', 'package', 'Condition', 'Make', 'location', 'region']
