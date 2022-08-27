@@ -31,9 +31,9 @@ def home_page():
 
     cols = df.columns.tolist()
 
-    a1, a2, a3 = st.columns(3)
-    b1, b2, b3 = st.columns(3)
-    c1, c2, c3 = st.columns(3)
+    a1, a2 = st.columns(2)
+    b1, b2 = st.columns(2)
+    c1, c2 = st.columns(2)
     a1.metric('Total Products', df['Product Id'].nunique())
     a2.metric('Top Product', df['Type'].value_counts().idxmax())
 
