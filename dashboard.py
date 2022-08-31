@@ -8,7 +8,6 @@ import plotly.express as px
 plt.rcParams['figure.figsize'] = [10, 5]
 plt.style.use('fivethirtyeight')
 
-
 df = pd.read_csv('basic_parts_data2.csv')
 df.drop('Unnamed: 0', axis=1, inplace=True)
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -22,12 +21,6 @@ ls_product_num = ['Price', 'Inquires', 'Listing Duration', 'Moderated Duration',
 def home_page():
     # st.set_page_config(layout='wide')
     st.header('Car parts stats')
-
-    pie_chart1 = px.pie(df,
-                        title='Product Condition',
-                        values=df['Condition'].value_counts(),
-                        names=df['Condition'].value_counts().keys()
-                        )
 
     cols = df.columns.tolist()
 
@@ -46,29 +39,42 @@ def home_page():
     col_selection = st.multiselect('Fields', cols,
                                    default=['Title', 'Type', 'Seller Name', 'Location', 'Price', 'Make'])
     st.dataframe(df[col_selection])
-    st.plotly_chart(pie_chart1)
 
 
-def plot_group_bars(column_name, log_scale, data):
+def plot_group_bars(column_name, log_scale, dt):
+    nav = st.radio('Select Plots', ('All', 'Filter'))
     # Step 1 Create a df based on the categorical variable
-    data = data[column_name].value_counts().rename_axis(column_name).to_frame('counts').reset_index()
-
+    if nav == 'All':
+        data = dt[column_name].value_counts().rename_axis(column_name).to_frame('counts').reset_index()
     # step 2: get the variables to do the plots:
-    x = data[column_name][:20]
-    y = data['counts'][:20]
-    total = data['counts'].sum()
+    if nav == 'Filter':
+        # col2 = st.sidebar.selectbox('Select a parameter', ls_product_cat)
+        # ls_product_cat.remove(column_name)
+        new_ls = [item for item in ls_product_cat if item !=column_name]
+        # st.write(column_name)
+        # st.write(ls_product_cat)
+        cola = st.selectbox('Filter By', new_ls)
+        colb = st.selectbox('Select', dt[cola].value_counts().keys()[:10])
+        filt = (dt[cola] == colb)
+        dt2 = dt.loc[filt]
+        data = dt2[column_name].value_counts().rename_axis(column_name).to_frame('counts').reset_index()
+        # st.dataframe(data)
 
-    # step3 add details to the plots:
-    plt.title(f'{column_name.capitalize()} (Total: {total})')
-    plt.xlabel(column_name.capitalize())
-    plt.ylabel('No. of Products')
-    plt.xticks(rotation=90)
-
-    if log_scale:
-        plt.yscale('log')
-
-    plt.bar(x, y)
-    st.pyplot()
+    try:
+        x = data[column_name][:20]
+        y = data['counts'][:20]
+        total = data['counts'].sum()
+        # step3 add details to the plots:
+        plt.title(f'{column_name.capitalize()} (Total: {total})')
+        plt.xlabel(column_name.capitalize())
+        plt.ylabel('No. of Products')
+        plt.xticks(rotation=90)
+        if log_scale:
+            plt.yscale('log')
+        plt.bar(x, y)
+        st.pyplot()
+    except:
+        st.write('Could not plot')
 
 
 def plot_hist(column_name, log_scale, quantile, data):
@@ -96,13 +102,13 @@ def plot_hist(column_name, log_scale, quantile, data):
 
 nav = st.sidebar.radio('Select Plots', ('Home', 'Bars', 'Histograms'))
 
-if nav=='Home':
+if nav == 'Home':
     home_page()
 
 if nav == 'Bars':
     st.title('Bars')
-    col2 = st.sidebar.selectbox('Select a parameter', ls_product_cat)
-    option = st.sidebar.selectbox('Use Log', (False, True))
+    col2 = st.selectbox('Do analysis for', ls_product_cat)
+    option = st.selectbox('Use Log', (False, True))
     # number = st.sidebar.number_input('Enter Percentile', step=15)
     plot_group_bars(col2, option, df)
 
